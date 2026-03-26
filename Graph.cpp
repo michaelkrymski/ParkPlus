@@ -9,6 +9,7 @@
 #include <iomanip>
 void Graph::insertEdge(Node from, Node to, float weight) {
     adjacencyList[from].push_back({to,weight});
+    adjacencyList[to].push_back({from, weight});
     edges++;
 }
 //

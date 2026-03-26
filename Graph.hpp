@@ -38,7 +38,7 @@ class Graph {//Adjacencylist implementation
         void addNode(Node node_) {
 
             int x = node_.id*2 + 100;
-            if(node_.id >= node_vector.size()) node_vector.resize(x);
+            if((size_t)node_.id >= node_vector.size()) node_vector.resize(x);
             node_vector.at(node_.id) = node_;
         }
         
