@@ -8,6 +8,6 @@ int main() {
     std::string node_list = "nodes_test.csv";
     bro.makeGraph(node_list,edge_list);    
     std::cout << (bro.isEdge(1016,1017)) << std::endl;
-    bro.printGraph();
+    // bro.printGraph();
    return 0;
 }

@@ -7,14 +7,14 @@
 #include <iostream>
 #include <fstream>
 #include <iomanip>
-void Graph::insertEdge(int from, int to, float weight) {
+void Graph::insertEdge(Node from, Node to, float weight) {
     adjacencyList[from].push_back({to,weight});
     edges++;
 }
-
+//
 bool Graph::isEdge(int from, int to) {
-    for(std::pair <int, float> pair: adjacencyList[from]) 
-        if (pair.first == to) return true;
+    for(std::pair <Node, float> pair: adjacencyList[ node_vector.at(from) ] )
+        if (pair.first == node_vector.at(to)) return true;
     return false;
 }
 void Graph::makeGraph(std::string node_list, std::string edge_list) {
@@ -49,9 +49,9 @@ void Graph::makeGraph(std::string node_list, std::string edge_list) {
         std::string to_id = cuzzo.substr(firstComma+1, secondComma-firstComma-1);
         std::string distance_m = cuzzo.substr(secondComma+1);
         int from_id_int = std::stoi(from_id);
-        int to_id_int = std::stod(to_id);
+        int to_id_int = std::stoi(to_id);
         float distance_m_float = std::stof(distance_m);
-        insertEdge(from_id_int,to_id_int,distance_m_float);
+        insertEdge(node_vector.at(from_id_int),node_vector.at(to_id_int),distance_m_float);
     }
     node_file.close();
 }
@@ -60,9 +60,9 @@ void Graph::makeGraph(std::string node_list, std::string edge_list) {
 void Graph::printGraph() {
 
     for (auto iter = adjacencyList.begin(); iter != adjacencyList.end(); iter++) {
-        std::cout << iter->first << " --> {";
+        std::cout << iter->first.id << " --> {";
         for(size_t i = 0; i < iter->second.size(); i ++ ) {
-            std::cout << "( " << iter->second.at(i).first << ", " << iter->second.at(i).second << " )";
+            std::cout << "( " << iter->second.at(i).first.id << ", " << iter->second.at(i).second << " )";
         }
         std::cout << "}" << std::endl;
 
