@@ -31,7 +31,7 @@ class Graph {//Adjacencylist implementation
         int getWeight(int from, int to);
         std::vector< std::pair<int, float> > getAdjacent(int from) { return adjacencyList[from];}
         void printGraph();
-        void makeGraph();
+        void makeGraph(std::string node_list, std::string edge_list);
 };
 
 

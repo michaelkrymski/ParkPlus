@@ -17,8 +17,8 @@ bool Graph::isEdge(int from, int to) {
         if (pair.first == to) return true;
     return false;
 }
-void Graph::makeGraph() {
-    std::fstream node_file("nodes_test.csv");
+void Graph::makeGraph(std::string node_list, std::string edge_list) {
+    std::fstream node_file(node_list);
     if(!node_file.is_open()) {
         std::cerr << "failed to open" << std::endl;
         return;
@@ -40,7 +40,7 @@ void Graph::makeGraph() {
     }
 
     node_file.close();  
-    node_file.open("edges_test.csv");
+    node_file.open(edge_list);
     std::getline(node_file, cuzzo);
     while(std::getline(node_file,cuzzo, '\n')) {
         std::string from_id = cuzzo.substr(0, cuzzo.find(","));
