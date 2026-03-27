@@ -130,4 +130,6 @@ public:
         }
         node_file.close();
     }
+
+    Node getNode(int id) { return node_vector.at(id); }
 };
