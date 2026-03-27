@@ -1,6 +1,6 @@
 /*
     ParkPlus - main.cpp
-    Team: Michael Krymski,
+    Team: Michael Krymski, Gavin Calleja, Intevere
 
     This file contains the main functionality relating to searching and algorithms for finding the closest parking spots to the user's
     destination. Each teammate that has contributed to this file has their own section.
