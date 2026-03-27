@@ -16,6 +16,21 @@ def haversine(lat1, lon1, lat2, lon2):
         math.cos(math.radians(lat2)) * math.sin(dlon/2)**2
     return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
 
+def centroid(geometry):
+    coords = geometry["coordinates"]
+    if geometry["type"] == "Point":
+        return coords[1], coords[0]
+    elif geometry["type"] == "Polygon":
+        pts = coords[0]
+    elif geometry["type"] == "MultiPolygon":
+        pts = coords[0][0]
+    else:
+        return None, None
+
+    lat = sum(p[1] for p in pts) / len(pts)
+    lon = sum(p[0] for p in pts) / len(pts)
+    return lat, lon
+
 def nodeCheck(lat, lon):
     key = (round(lat, 5), round(lon, 5))
     if key not in nodeDict:
@@ -42,6 +57,27 @@ for i, feature in enumerate(roads["features"]):
         b = nodeCheck(lat2, lon2)
         dist = haversine(lat1, lon1, lat2, lon2)
         edges.append((a, b, round(dist, 2)))
+
+
+# generate parking_lots.csv
+with open("../data/InputCreation/parking.geojson", encoding="utf-8") as parkingFileBase:
+    parking = json.load(parkingFileBase)
+
+with open("../data/InputCreation/parking_lots.csv", "w", newline="", encoding="utf-8") as parkingOutput:
+    writer = csv.writer(parkingOutput)
+    writer.writerow(["lat, long", "name", "access", "parking"])
+    for feature in parking["features"]:
+        props = feature.get("properties", {})
+        lat, lon = centroid(feature["geometry"])
+        if lat is None:
+            continue
+
+        writer.writerow([
+            f"{round(lat, 6)}, {round(lon, 6)}",
+            props.get("name", ""),
+            props.get("access", "yes"),
+            props.get("parking", ""),
+        ])
 
 # Build KDTree for nearest neighbor search
 kdtree = KDTree(np.array(nodeCoords))
