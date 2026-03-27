@@ -16,6 +16,7 @@
 #include <vector>
 #include <string>
 #include <cmath>
+#include <unordered_set>
 
 struct Result
 {
@@ -25,11 +26,11 @@ struct Result
     double lon;
     std::string type;
 
-    bool operator<(const Results &other) const
+    bool operator<(const Result &other) const
     {
         return distance < other.distance;
     }
-}
+};
 
 /* Gabriel's Section: Djikstra's Algorithm Implementation
 
@@ -40,7 +41,14 @@ struct Result
 
 */
 
-std::vector<ParkingResult>
+Graph &makeGraph(std::string node_list, std::string edge_list)
+{
+    Graph mainGraph{};
+    mainGraph.makeGraph(node_list, edge_list);
+    return mainGraph;
+}
+
+std::vector<Result>
 dijkstra(Graph &graph, int userDestination,
          std::unordered_set<int> &parkingIds, int numResults)
 {
@@ -54,7 +62,7 @@ dijkstra(Graph &graph, int userDestination,
 
 */
 
-std::vector<ParkingResult> astar(Graph &graph, int userDestination, std::unordered_set<int> &parkingIds,
-                                 int numResults, double haversineDistance)
+std::vector<Result> astar(Graph &graph, int userDestination, std::unordered_set<int> &parkingIds,
+                          int numResults, double haversineDistance)
 {
 }
