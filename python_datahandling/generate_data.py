@@ -25,7 +25,7 @@ def nodeCheck(lat, lon):
 
 edges = []
 
-with open("../data/roads.geojson") as roadsFile:
+with open("../data/InputCreation/roads.geojson", encoding="utf-8") as roadsFile:
     roads = json.load(roadsFile)
 
 for i, feature in enumerate(roads["features"]):
@@ -48,7 +48,7 @@ kdtree = KDTree(np.array(nodeCoords))
 parkingNodeIDs = []
 parkingMeta = []
 
-with open("../data/parking.csv") as parkingFile:
+with open("../data/InputCreation/parking.geojson", encoding="utf-8") as parkingFile:
     reader = csv.DictReader(parkingFile)
     for row in reader:
         lat_lon = row["lat, long"].split(",")
@@ -60,7 +60,7 @@ with open("../data/parking.csv") as parkingFile:
         parkingNodeIDs.append(nodeID)
 
         d, index = kdtree.query([lat, lon])
-        distance = haversine(lat, lon, *node_coords[idx])
+        distance = haversine(lat, lon, *nodeCoords[index])
         edges.append((nodeID, index, round(distance, 2)))
 
         parkingMeta.append(
@@ -75,19 +75,19 @@ with open("../data/parking.csv") as parkingFile:
 
 # Output all data to csvs.
 
-with open("../data/nodes.csv", "w", newline="") as nodesFile:
+with open("../data/nodes.csv", "w", newline="", encoding="utf-8") as nodesFile:
     writer = csv.writer(nodesFile)
     writer.writerow(["node_id", "lat", "lon"])
     for nodeID, (lat, lon) in enumerate(nodeCoords):
         writer.writerow([nodeID, lat, lon])
 
-with open("../data/edges.csv", "w", newline="") as edgesFile:
+with open("../data/edges.csv", "w", newline="", encoding="utf-8") as edgesFile:
     writer = csv.writer(edgesFile)
     writer.writerow(["from_node", "to_node", "distance"])
     for fromNode, toNode, distance in edges:
         writer.writerow([fromNode, toNode, distance])
 
-with open("../data/parking_nodes.csv", "w", newline="") as parkingFile:
+with open("../data/parking_nodes.csv", "w", newline="", encoding="utf-8") as parkingFile:
     writer = csv.writer(parkingFile)
     writer.writerow(["node_id", "lat", "lon", "name", "type"])
     for meta in parkingMeta:
