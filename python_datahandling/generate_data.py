@@ -48,7 +48,7 @@ kdtree = KDTree(np.array(nodeCoords))
 parkingNodeIDs = []
 parkingMeta = []
 
-with open("../data/InputCreation/parking.geojson", encoding="utf-8") as parkingFile:
+with open("../data/InputCreation/parking_lots.csv", encoding="utf-8") as parkingFile:
     reader = csv.DictReader(parkingFile)
     for row in reader:
         lat_lon = row["lat, long"].split(",")
