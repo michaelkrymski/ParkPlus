@@ -37,6 +37,9 @@ struct Result
     {
         return distance < other.distance;
     }
+
+    Result(int nodeID_, float distance_, double lat_, double lon_, std::string type_)
+        : nodeID(nodeID_), distance(distance_), lat(lat_), lon(lon_), type(type_) {}
 };
 
 // Haversine formula to calculate direct distance between two points on the Earth's surface.
