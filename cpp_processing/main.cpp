@@ -1,6 +1,6 @@
 /*
     ParkPlus - main.cpp
-    Team: Michael Krymski, Gavin Calleja, Intervere
+    Team: Michael Krymski, Gavin Calleja, Gabriel Colen
 
     This file contains the main functionality relating to searching and algorithms for finding the closest parking spots to the user's
     destination. Each teammate that has contributed to this file has their own section.
@@ -18,6 +18,7 @@
 #include <cmath>
 #include <unordered_set>
 #include <unordered_map>
+#include <queue>
 
 // Fallback PI definition for some compilers.
 #ifndef M_PI
@@ -103,11 +104,64 @@ void loadParkingData(const std::string &path, std::unordered_set<int> &parkingId
 */
 
 std::vector<Result>
-dijkstra(Graph &graph, int userDestination,
-         std::unordered_set<int> &parkingIds, int numResults)
+dijkstra(Graph &graph, int userDestination, std::unordered_set<int> &parkingIds, int numResults)
 {
-    //TODO
     std::vector<Result> results;
+
+    std::priority_queue<
+        std::pair<float, int>,
+        std::vector<std::pair<float, int>>,
+        std::greater<std::pair<float, int>>> pq;
+
+    std::unordered_map<int, float> dist;
+
+    std::unordered_set<int> addedToResults; //duplicates
+
+    dist[userDestination] = 0.0f;
+    pq.push({0.0f, userDestination});
+
+    while (!pq.empty() && (int)results.size() < numResults)
+    {
+        float currentDist = pq.top().first;
+        int currentID = pq.top().second;
+        pq.pop();
+
+        if (dist.find(currentID) != dist.end() && currentDist > dist[currentID])
+            continue;
+
+        Node currentNode = graph.getNode(currentID);
+
+        if (parkingIds.find(currentID) != parkingIds.end() &&
+            addedToResults.find(currentID) == addedToResults.end())
+        {
+            results.push_back(Result(
+                currentID,
+                currentDist,
+                currentNode.latitude,
+                currentNode.longitude,
+                "Parking"));
+
+            addedToResults.insert(currentID);
+
+            if ((int)results.size() == numResults)
+                break;
+        }
+
+        std::vector<std::pair<Node, float>> neighbors = graph.getAdjacent(currentNode);
+        for (const auto &neighborPair : neighbors)
+        {
+            Node neighbor = neighborPair.first;
+            float weight = neighborPair.second;
+            float newDist = currentDist + weight;
+
+            if (dist.find(neighbor.id) == dist.end() || newDist < dist[neighbor.id])
+            {
+                dist[neighbor.id] = newDist;
+                pq.push({newDist, neighbor.id});
+            }
+        }
+    }
+
     return results;
 }
 
