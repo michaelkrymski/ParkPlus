@@ -38,7 +38,7 @@ namespace std
 }
 
 class Graph
-{ // Adjacencylist implementation
+{ // Adjacencylist implementation, A lot of it was from the Adjacencylist implementation video in modules. hence the similarities
 private:
     std::unordered_map<Node, std::vector<std::pair<Node, float>>> adjacencyList;
     // i.e street1 -> { <street2, 10> <street3,11> <wallstreet, 12> }
