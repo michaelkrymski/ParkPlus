@@ -144,7 +144,7 @@ int main(int argc, char *argv[])
 
     std::unordered_set<int> parkingIDs;
     std::unordered_map<int, std::string> parkingMeta;
-    loadParkingData("../data/parking.csv", parkingIDs, parkingMeta);
+    loadParkingData("../data/parking_nodes.csv", parkingIDs, parkingMeta);
 
     std::vector<Result> dijkstraResults = dijkstra(graph, originID, parkingIDs, numResults);
     std::vector<Result> astarResults = astar(graph, originID, parkingIDs, numResults, destLat, destLon);
