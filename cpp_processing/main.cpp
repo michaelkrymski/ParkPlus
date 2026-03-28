@@ -171,8 +171,58 @@ std::vector<Result> astar(Graph &graph, int userDestination, std::unordered_set<
                           int numResults, double destLat, double destLon)
 {
     //TODO
-    std::vector<Result> results;
+     int src = userDestination; // changed variable name so that i can streamline edugator into here
+    float infinity = std::numeric_limits<float>::max();
+    int vertices = graph.nodeVectorSize();
+    std::vector<float> distance(vertices, infinity);
+    std::vector<Result> results{};
+    //(distance, Node);
+    std::priority_queue< std::pair<float, int>, std::vector<std::pair<float,int>>, std::greater<std::pair<float,int>> > PQ;
+    distance[src] = 0;
+    PQ.push({0,src});
+    while(!PQ.empty() && results.size() < numResults) {
+        std::pair<float,int> top = PQ.top();
+        float distance_to_top = top.first;
+        int top_vertex = top.second;
+ 
+        PQ.pop();
+        if(distance_to_top > distance[top_vertex]) continue;
+        if(parkingIds.count(top_vertex)) {
+
+            /*
+             *        parkingMeta[id] = name + " (" + type + ")";
+             *Result(int nodeID_, float distance_, double lat_, double lon_, std::string type_)
+        : nodeID(nodeID_), distance(distance_), lat(lat_), lon(lon_), type(type_) {}
+             *        // Input format: id,lat,lon,name,type
+             * */
+            Node parkingLot = graph.getNode(top_vertex);
+            results.push_back(Result(top_vertex, distance_to_top,parkingLot.latitude,parkingLot.longitude, "will fixx later"));
+        }
+
+        const std::vector<std::pair<Node, float>>& Neighbors = graph.getAdjacent(graph.getNode(top_vertex));
+        // std::vector<std::pair<float,int>> neighbors = graph.getAdjacent(graph.getNode(top_vertex));
+        for(std::pair <Node, float> pair : Neighbors) {
+            int new_vertex = pair.first.id;
+            float weight = pair.second;
+           
+            if(weight + distance_to_top < distance[new_vertex]) {
+                Node new_vertex_node = graph.getNode(new_vertex);
+                double heuristic_calculation = haversine(new_vertex_node.latitude,new_vertex_node.longitude,destLat,destLon);
+                distance[new_vertex] = weight + distance_to_top;
+                PQ.push({distance[new_vertex] + heuristic_calculation, new_vertex});
+            }
+            
+        }
+
+    }
+    //src node would be userDestination
+    //distance list/maxheap/unordered_set
+    // limit number of results to 
+    // if results vector > numResults*100
+    // we could check if a node is a parking lot with parkingIds.count(node.Id);
+    
     return results;
+
 }
 
 int main(int argc, char *argv[])
