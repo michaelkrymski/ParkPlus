@@ -1,6 +1,6 @@
 /*
     ParkPlus - main.cpp
-    Team: Michael Krymski, Gavin Calleja, Intervere
+    Team: Michael Krymski, Gavin Calleja, Gabriel Colen
 
     This file contains the main functionality relating to searching and algorithms for finding the closest parking spots to the user's
     destination. Each teammate that has contributed to this file has their own section.
@@ -18,6 +18,7 @@
 #include <cmath>
 #include <unordered_set>
 #include <unordered_map>
+#include <queue>
 
 // Fallback PI definition for some compilers.
 #ifndef M_PI
@@ -103,11 +104,58 @@ void loadParkingData(const std::string &path, std::unordered_set<int> &parkingId
 */
 
 std::vector<Result>
-dijkstra(Graph &graph, int userDestination,
-         std::unordered_set<int> &parkingIds, int numResults)
+dijkstra(Graph &graph, int end, std::unordered_set<int> &parkids, int spots)
 {
-    //TODO
     std::vector<Result> results;
+
+    std::priority_queue<
+        std::pair<float, int>,
+        std::vector<std::pair<float, int>>,
+        std::greater<std::pair<float, int>>> heap; //min heap of distances
+
+    std::unordered_map<int, float> distances; //shortest dist to node
+
+    std::unordered_set<int> dupes;
+
+    distances[end] = 0.0f;
+    heap.push({0.0f, end}); //add start node
+
+    while (!heap.empty() && (int)results.size() < spots) //loop until number of spots is sufficient
+    {
+        float curDist = heap.top().first;
+        int curID = heap.top().second;
+        heap.pop();
+
+        if (distances.find(curID) != distances.end() && curDist > distances[curID])
+            continue; //ignore further duplicates
+
+        Node curNode = graph.getNode(curID);
+
+        if (parkids.find(curID) != parkids.end() && dupes.find(curID) == dupes.end()) //if node is new parking
+        {
+            results.push_back(Result(curID, curDist, curNode.latitude, curNode.longitude, "Parking"));
+
+            dupes.insert(currentID);
+
+            if ((int)results.size() == spots)
+                break; //end
+        }
+
+        std::vector<std::pair<Node, float>> neighbors = graph.getAdjacent(curNode); //all adjacent nodes
+        for (auto &neighborp : neighbors)
+        {
+            Node neighbor = neighborp.first;
+            float dist = neighborp.second;
+            float totalDistance = curDist + dist; //distance from start to node
+
+            if (distances.find(neighbor.id) == distances.end() || totalDistance < distances[neighbor.id]) //if shortest path
+            {
+                distances[neighbor.id] = totalDistance;
+                heap.push({totalDistance, neighbor.id});
+            }
+        }
+    }
+
     return results;
 }
 
