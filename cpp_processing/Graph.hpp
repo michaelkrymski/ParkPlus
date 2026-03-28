@@ -46,9 +46,13 @@ private:
     int edges;
     // graph data structure
 public:
-    Graph() : adjacencyList(), node_vector(), edges(0) {}
+    Graph() : adjacencyList(), node_vector(), edges(0) {node_vector.reserve(10000000); adjacencyList.reserve(10000000);}
     int numVertices() { return adjacencyList.size(); } // returns number of Vertices
+    
+    int numVertices() const { return adjacencyList.size(); } // returns number of Vertices
     int numEdges() { return edges; }                   // returns number of Edges
+    size_t nodeVectorSize() const { return node_vector.size();}    
+    int numEdges() const { return edges; }                   // returns number of Edges
     void addNode(Node node_)
     {
 
@@ -75,6 +79,7 @@ public:
 
     std::vector<std::pair<Node, float>> getAdjacent(Node from) { return adjacencyList[from]; }
 
+    std::vector<std::pair<Node, float>> getAdjacent(Node from) const { return adjacencyList.at(from); }
     void printGraph()
     {
         for (auto iter = adjacencyList.begin(); iter != adjacencyList.end(); iter++)
@@ -132,4 +137,6 @@ public:
     }
 
     Node getNode(int id) { return node_vector.at(id); }
+
+    Node getNode(int id) const { return node_vector.at(id); }
 };
