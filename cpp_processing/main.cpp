@@ -177,10 +177,6 @@ dijkstra(Graph &graph, int end, std::unordered_set<int> &parkids, int spots)
 std::vector<Result> astar(Graph &graph, int userDestination, std::unordered_set<int> &parkingIds,
                           int numResults, double destLat, double destLon)
 {
-<<<<<<< Updated upstream
-=======
-    // TODO
->>>>>>> Stashed changes
     int src = userDestination; // changed variable name so that i can streamline edugator into here
     float infinity = std::numeric_limits<float>::max();
     int vertices = graph.nodeVectorSize();
@@ -194,16 +190,15 @@ std::vector<Result> astar(Graph &graph, int userDestination, std::unordered_set<
     while (!PQ.empty() && results.size() < numResults)
     {
         std::pair<float, int> top = PQ.top();
-<<<<<<< Updated upstream
-        float distance_to_top = top.first;
         int top_vertex = top.second;
 
         PQ.pop();
-        if (distance_to_top > distance[top_vertex])
-            continue;
-        if (parkingIds.count(top_vertex))
+        if (distance[top_vertex] > 15000.0f)
+            break; // over 15000m is irrelevant for our purposes.
+        if (parkingIds.count(top_vertex) && !duplicateParking.count(top_vertex))
         {
 
+            duplicateParking.insert(top_vertex);
             /*
              *        parkingMeta[id] = name + " (" + type + ")";
              *Result(int nodeID_, float distance_, double lat_, double lon_, std::string type_)
@@ -211,35 +206,11 @@ std::vector<Result> astar(Graph &graph, int userDestination, std::unordered_set<
              *        // Input format: id,lat,lon,name,type
              * */
             Node parkingLot = graph.getNode(top_vertex);
-            results.push_back(Result(top_vertex, distance_to_top, parkingLot.latitude, parkingLot.longitude, "will fixx later"));
+            results.push_back(Result(top_vertex, distance[top_vertex], parkingLot.latitude, parkingLot.longitude, "will fixx later"));
+            if (results.size() == numResults)
+                break;
         }
 
-=======
-        int top_vertex = top.second;
-        PQ.pop();
-
-        float distance_to_top = distance[top_vertex];
-
-        if (distance_to_top > 15000.0f)
-            break;
-        if (parkingIds.count(top_vertex) && !duplicateParking.count(top_vertex))
-        {
-            duplicateParking.insert(top_vertex);
-            {
-
-                /*
-                 *        parkingMeta[id] = name + " (" + type + ")";
-                *Result(int nodeID_, float distance_, double lat_, double lon_, std::string type_)
-            : nodeID(nodeID_), distance(distance_), lat(lat_), lon(lon_), type(type_) {}
-              *        // Input format: id,lat,lon,name,type
-                 * */
-                Node parkingLot = graph.getNode(top_vertex);
-                results.push_back(Result(top_vertex, distance_to_top, parkingLot.latitude, parkingLot.longitude, "will fixx later"));
-                if (results.size() == numResults)
-                    break;
-            }
-        }
->>>>>>> Stashed changes
         const std::vector<std::pair<Node, float>> &Neighbors = graph.getAdjacent(graph.getNode(top_vertex));
         // std::vector<std::pair<float,int>> neighbors = graph.getAdjacent(graph.getNode(top_vertex));
         for (std::pair<Node, float> pair : Neighbors)
@@ -247,15 +218,14 @@ std::vector<Result> astar(Graph &graph, int userDestination, std::unordered_set<
             int new_vertex = pair.first.id;
             float weight = pair.second;
 
-            if (weight + distance_to_top < distance[new_vertex])
+            if (weight + distance[top_vertex] < distance[new_vertex])
             {
                 Node new_vertex_node = graph.getNode(new_vertex);
                 double heuristic_calculation = haversine(new_vertex_node.latitude, new_vertex_node.longitude, destLat, destLon);
-                distance[new_vertex] = weight + distance_to_top;
+                distance[new_vertex] = weight + distance[top_vertex];
                 PQ.push({distance[new_vertex] + heuristic_calculation, new_vertex});
             }
         }
-<<<<<<< Updated upstream
     }
     // src node would be userDestination
     // distance list/maxheap/unordered_set
@@ -263,16 +233,6 @@ std::vector<Result> astar(Graph &graph, int userDestination, std::unordered_set<
     //  if results vector > numResults*100
     //  we could check if a node is a parking lot with parkingIds.count(node.Id);
 
-    std::cout << "A* found " << results.size() << " results." << std::endl;
-=======
-        // src node would be userDestination
-        // distance list/maxheap/unordered_set
-        //  limit number of results to
-        //  if results vector > numResults*100
-        //  we could check if a node is a parking lot with parkingIds.count(node.Id);
-    }
-
->>>>>>> Stashed changes
     return results;
 }
 
