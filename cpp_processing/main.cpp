@@ -104,60 +104,54 @@ void loadParkingData(const std::string &path, std::unordered_set<int> &parkingId
 */
 
 std::vector<Result>
-dijkstra(Graph &graph, int userDestination, std::unordered_set<int> &parkingIds, int numResults)
+dijkstra(Graph &graph, int end, std::unordered_set<int> &parkids, int spots)
 {
     std::vector<Result> results;
 
     std::priority_queue<
         std::pair<float, int>,
         std::vector<std::pair<float, int>>,
-        std::greater<std::pair<float, int>>> pq;
+        std::greater<std::pair<float, int>>> heap; //min heap of distances
 
-    std::unordered_map<int, float> dist;
+    std::unordered_map<int, float> distances; //shortest dist to node
 
-    std::unordered_set<int> addedToResults; //duplicates
+    std::unordered_set<int> dupes;
 
-    dist[userDestination] = 0.0f;
-    pq.push({0.0f, userDestination});
+    distances[end] = 0.0f;
+    heap.push({0.0f, end}); //add start node
 
-    while (!pq.empty() && (int)results.size() < numResults)
+    while (!heap.empty() && (int)results.size() < spots) //loop until number of spots is sufficient
     {
-        float currentDist = pq.top().first;
-        int currentID = pq.top().second;
-        pq.pop();
+        float curDist = heap.top().first;
+        int curID = heap.top().second;
+        heap.pop();
 
-        if (dist.find(currentID) != dist.end() && currentDist > dist[currentID])
-            continue;
+        if (distances.find(curID) != distances.end() && curDist > distances[curID])
+            continue; //ignore further duplicates
 
-        Node currentNode = graph.getNode(currentID);
+        Node curNode = graph.getNode(curID);
 
-        if (parkingIds.find(currentID) != parkingIds.end() &&
-            addedToResults.find(currentID) == addedToResults.end())
+        if (parkids.find(curID) != parkids.end() && dupes.find(curID) == dupes.end()) //if node is new parking
         {
-            results.push_back(Result(
-                currentID,
-                currentDist,
-                currentNode.latitude,
-                currentNode.longitude,
-                "Parking"));
+            results.push_back(Result(curID, curDist, curNode.latitude, curNode.longitude, "Parking"));
 
-            addedToResults.insert(currentID);
+            dupes.insert(currentID);
 
-            if ((int)results.size() == numResults)
-                break;
+            if ((int)results.size() == spots)
+                break; //end
         }
 
-        std::vector<std::pair<Node, float>> neighbors = graph.getAdjacent(currentNode);
-        for (const auto &neighborPair : neighbors)
+        std::vector<std::pair<Node, float>> neighbors = graph.getAdjacent(curNode); //all adjacent nodes
+        for (auto &neighborp : neighbors)
         {
-            Node neighbor = neighborPair.first;
-            float weight = neighborPair.second;
-            float newDist = currentDist + weight;
+            Node neighbor = neighborp.first;
+            float dist = neighborp.second;
+            float totalDistance = curDist + dist; //distance from start to node
 
-            if (dist.find(neighbor.id) == dist.end() || newDist < dist[neighbor.id])
+            if (distances.find(neighbor.id) == distances.end() || totalDistance < distances[neighbor.id]) //if shortest path
             {
-                dist[neighbor.id] = newDist;
-                pq.push({newDist, neighbor.id});
+                distances[neighbor.id] = totalDistance;
+                heap.push({totalDistance, neighbor.id});
             }
         }
     }
