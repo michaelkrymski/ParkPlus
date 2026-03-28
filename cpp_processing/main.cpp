@@ -37,6 +37,9 @@ struct Result
     {
         return distance < other.distance;
     }
+
+    Result(int nodeID_, float distance_, double lat_, double lon_, std::string type_)
+        : nodeID(nodeID_), distance(distance_), lat(lat_), lon(lon_), type(type_) {}
 };
 
 // Haversine formula to calculate direct distance between two points on the Earth's surface.
@@ -150,14 +153,17 @@ int main(int argc, char *argv[])
     std::vector<Result> astarResults = astar(graph, originID, parkingIDs, numResults, destLat, destLon);
 
     std::cout << "DJ" << std::endl;
+
+    // node, dist, lat, lon, type
+
     for(const Result &res : dijkstraResults)
     {
-        std::cout << res.nodeID << ": " << res.distance << "m, " << parkingMeta[res.nodeID] << std::endl;
+        std::cout << res.nodeID << "," << res.distance << "," << res.lat << "," << res.lon << "," << res.type << std::endl;
     }
     std::cout << "A*" << std::endl;
     for(const Result &res : astarResults)
     {
-        std::cout << res.nodeID << ": " << res.distance << "m, " << parkingMeta[res.nodeID] << std::endl;
+        std::cout << res.nodeID << "," << res.distance << "," << res.lat << "," << res.lon << "," << res.type << std::endl;
     }
 
     return 0;
