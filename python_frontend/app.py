@@ -4,6 +4,7 @@ import requests
 import csv
 import numpy as np
 from scipy.spatial import KDTree
+import os
 
 # Setup flask environment with name.
 app = Flask(__name__)
@@ -75,10 +76,14 @@ def search():
     temp, index = tree.query([lat, lon])
     nearestRoadID = int(index)
 
+    #debug
+    print("Binary exists:", os.path.exists("../parkplus.exe"))
+    print("Calling:", ["../parkplus.exe", str(nearestRoadID), str(numResults), str(lat), str(lon)])
+
     # Subprocess to interact with cpp program.
     result = subprocess.run(
         [ #Call parkplus with 4 input params.
-            "./parkplus",
+            "../parkplus.exe",
             str(nearestRoadID),
             str(numResults),
             str(lat),
@@ -87,6 +92,13 @@ def search():
         capture_output=True, #Grab stdout
         text=True #get stdout as string
     )
+
+    print("Return code:", result.returncode)
+
+    if result.returncode != 0:
+        print("STDERR:", result.stderr)
+        print("STDOUT:", result.stdout)
+        return jsonify({"error": result.stderr}), 500
 
     if result.returncode != 0:
         return jsonify({"error": result.stderr}), 500 # Pull error from call.
