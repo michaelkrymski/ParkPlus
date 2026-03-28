@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>ParkPlus</title>
+</head>
+
+<body>
+
+    <h1>ParkPlus</h1>
+
+    <div>
+        <label>Destination address</label><br>
+        <input type="text" id="address" placeholder="e.g. Ben Hill Griffin Stadium, Gainesville FL"><br>
+        <label>Number of results</label><br>
+        <input type="number" id="num_results" value="10" min="1" max="20"><br>
+        <button onclick="search()">Search</button>
+    </div>
+
+    <div id="error" class="error"></div>
+
+    <div class="results">
+        <div class="column">
+            <h2>Dijkstra</h2>
+            <div id="dijkstra-results"></div>
+        </div>
+        <div class="column">
+            <h2>A*</h2>
+            <div id="astar-results"></div>
+        </div>
+    </div>
+
+    <script>
+        async function search() {
+            document.getElementById("error").innerText = "";
+            document.getElementById("dijkstra-results").innerHTML = "Loading...";
+            document.getElementById("astar-results").innerHTML = "Loading...";
+
+            const address = document.getElementById("address").value;
+            const num_results = parseInt(document.getElementById("num_results").value);
+
+            const response = await fetch("/search", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ address, num_results })
+            });
+
+            const data = await response.json();
+
+            if (data.error) {
+                document.getElementById("error").innerText = data.error;
+                document.getElementById("dijkstra-results").innerHTML = "";
+                document.getElementById("astar-results").innerHTML = "";
+                return;
+            }
+
+            displayResults("dijkstra-results", data.dijkstra);
+            displayResults("astar-results", data.astar);
+        }
+
+        function displayResults(elementId, results) {
+            //Todo
+        }
+    </script>
+
+</body>
+
+</html>
