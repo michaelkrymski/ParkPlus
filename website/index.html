@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <title>ParkPlus</title>
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 </head>
 
 <body>
@@ -24,14 +27,45 @@
         <div class="column">
             <h2>Dijkstra</h2>
             <div id="dijkstra-results"></div>
+            <div id="map-dj" class="map"></div>
         </div>
         <div class="column">
             <h2>A*</h2>
             <div id="astar-results"></div>
+            <div id="map-astar" class="map"></div>
         </div>
     </div>
 
     <script>
+        let maps = {};
+
+        function plotMap(elementId, results, destLat, destLon) {
+            if (!maps[elementId]) {
+                maps[elementId] = L.map(elementId).setView([destLat, destLon], 14);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: 'Credit: OpenStreetMap'
+                }).addTo(maps[elementId]);
+            }
+
+            const map = maps[elementId];
+            map.eachLayer(layer => { if (layer instanceof L.CircleMarker) map.removeLayer(layer); });
+
+            L.circleMarker([destLat, destLon], { radius: 10, color: '#e53e3e', fillColor: '#e53e3e', fillOpacity: 1 })
+                .addTo(map).bindPopup("Destination");
+
+            const bounds = [[destLat, destLon]];
+            for (let i = 0; i < results.length; i++) {
+                const r = results[i];
+                const distStr = parseFloat(r.distance) >= 1000
+                    ? (parseFloat(r.distance) / 1000).toFixed(2) + " km"
+                    : Math.round(parseFloat(r.distance)) + " m";
+                L.circleMarker([parseFloat(r.lat), parseFloat(r.lon)], { radius: 8, color: '#3182ce', fillColor: '#3182ce', fillOpacity: 0.8 })
+                    .addTo(map).bindPopup(`#${i + 1} — ${r.type}<br>${distStr}`);
+                bounds.push([parseFloat(r.lat), parseFloat(r.lon)]);
+            }
+            map.fitBounds(bounds, { padding: [30, 30] });
+        }
+
         async function search() {
             document.getElementById("error").innerText = "";
             document.getElementById("dijkstra-results").innerHTML = "Loading...";
@@ -57,6 +91,14 @@
 
             displayResults("dijkstra-results", data.dijkstra);
             displayResults("astar-results", data.astar);
+            plotMap("map-dj", data.dijkstra, data.lat, data.lon);
+            plotMap("map-astar", data.astar, data.lat, data.lon);
+
+            // Test add delay to render maps
+            // setTimeout(() => {
+            //     maps["map-dj"].invalidateSize();
+            //     maps["map-astar"].invalidateSize();
+            // }, 100);
         }
 
         function displayResults(elementId, results) {
@@ -73,18 +115,15 @@
                 const mapsUrl = `https://www.google.com/maps?q=${r.lat},${r.lon}`;
 
                 container.innerHTML +=
-
                     `<div class="card">
                     <h3>#${i + 1} — Node ${r.id}</h3>
                     <p>Type: ${r.type}</p>
                     <p>Distance: ${distanceStr}</p>
                     <p>Coordinates: ${parseFloat(r.lat).toFixed(5)}, ${parseFloat(r.lon).toFixed(5)}</p>
                     <a href="${mapsUrl}" target="_blank">View on Google Maps</a>
-                </div>`
-                    ;
+                </div>`;
             }
         }
-
     </script>
 
 </body>

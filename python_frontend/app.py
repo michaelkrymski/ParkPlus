@@ -9,6 +9,8 @@ import os
 # Setup flask environment with name.
 app = Flask(__name__)
 
+BINARY = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "parkplus"))
+
 # Load KDTree to get node closest to target destination. 
 print("Loading all nodes to KDTree...")
 nodeCoords = []
@@ -77,23 +79,26 @@ def search():
     nearestRoadID = int(index)
 
     #debug
-    print("Binary exists:", os.path.exists("../parkplus.exe"))
-    print("Calling:", ["../parkplus.exe", str(nearestRoadID), str(numResults), str(lat), str(lon)])
+    print("Binary exists:", os.path.exists(BINARY))
+    print("Calling:", [BINARY, str(nearestRoadID), str(numResults), str(lat), str(lon)])
 
     # Subprocess to interact with cpp program.
     result = subprocess.run(
         [ #Call parkplus with 4 input params.
-            "../parkplus.exe",
+            BINARY,
             str(nearestRoadID),
             str(numResults),
             str(lat),
             str(lon)
         ],
         capture_output=True, #Grab stdout
-        text=True #get stdout as string
+        text=True, #get stdout as string
+        cwd=os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
     )
 
     print("Return code:", result.returncode)
+
+    print("STDOUT:", repr(result.stdout))
 
     if result.returncode != 0:
         print("STDERR:", result.stderr)
@@ -108,6 +113,8 @@ def search():
     return jsonify(
         {
             "address":  address,
+            "lat":      lat,
+            "lon":      lon,
             "dijkstra": dj,
             "astar":    astar
         }

@@ -34,15 +34,14 @@ struct Result
     float distance;
     double lat;
     double lon;
-    std::string type;
 
     bool operator<(const Result &other) const
     {
         return distance < other.distance;
     }
 
-    Result(int nodeID_, float distance_, double lat_, double lon_, std::string type_)
-        : nodeID(nodeID_), distance(distance_), lat(lat_), lon(lon_), type(type_) {}
+    Result(int nodeID_, float distance_, double lat_, double lon_)
+        : nodeID(nodeID_), distance(distance_), lat(lat_), lon(lon_) {}
 };
 
 // Haversine formula to calculate direct distance between two points on the Earth's surface.
@@ -91,7 +90,7 @@ void loadParkingData(const std::string &path, std::unordered_set<int> &parkingId
         std::string type = line.substr(fourthCommaPos + 1, fifthCommaPos - fourthCommaPos - 1);
 
         parkingIds.insert(id);
-        parkingMeta[id] = name + " (" + type + ")";
+        parkingMeta[id] = type;
     }
     parkingFile.close();
 }
@@ -139,7 +138,7 @@ dijkstra(Graph &graph, int end, std::unordered_set<int> &parkids, int spots)
 
         if (parkids.find(curID) != parkids.end() && dupes.find(curID) == dupes.end()) // if node is new parking
         {
-            results.push_back(Result(curID, curDist, curNode.latitude, curNode.longitude, "Parking"));
+            results.push_back(Result(curID, curDist, curNode.latitude, curNode.longitude));
 
             dupes.insert(curID);
 
@@ -180,7 +179,7 @@ std::vector<Result> astar(Graph &graph, int userDestination, std::unordered_set<
     int src = userDestination; // changed variable name so that i can streamline edugator into here
     float infinity = std::numeric_limits<float>::max();
     int vertices = graph.nodeVectorSize();
-    std::vector<float> distance(vertices, infinity);
+    std::vector<float> distance(20000000, infinity);
     std::vector<Result> results{};
     std::unordered_set<int> duplicateParking;
     //(distance, Node);
@@ -206,7 +205,7 @@ std::vector<Result> astar(Graph &graph, int userDestination, std::unordered_set<
              *        // Input format: id,lat,lon,name,type
              * */
             Node parkingLot = graph.getNode(top_vertex);
-            results.push_back(Result(top_vertex, distance[top_vertex], parkingLot.latitude, parkingLot.longitude, "will fixx later"));
+            results.push_back(Result(top_vertex, distance[top_vertex], parkingLot.latitude, parkingLot.longitude));
             if (results.size() == numResults)
                 break;
         }
@@ -266,12 +265,12 @@ int main(int argc, char *argv[])
 
     for (const Result &res : dijkstraResults)
     {
-        std::cout << res.nodeID << "," << res.distance << "," << res.lat << "," << res.lon << "," << res.type << std::endl;
+        std::cout << res.nodeID << "," << res.distance << "," << res.lat << "," << res.lon << "," << parkingMeta.at(res.nodeID) << std::endl;
     }
     std::cout << "A*" << std::endl;
     for (const Result &res : astarResults)
     {
-        std::cout << res.nodeID << "," << res.distance << "," << res.lat << "," << res.lon << "," << res.type << std::endl;
+        std::cout << res.nodeID << "," << res.distance << "," << res.lat << "," << res.lon << "," << parkingMeta.at(res.nodeID) << std::endl;
     }
 
     return 0;
