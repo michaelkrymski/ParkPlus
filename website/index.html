@@ -13,12 +13,22 @@
 
     <h1>ParkPlus</h1>
 
-    <div>
-        <label>Destination address</label><br>
-        <input type="text" id="address" placeholder="e.g. Ben Hill Griffin Stadium, Gainesville FL"><br>
-        <label>Number of results</label><br>
-        <input type="number" id="numResults" value="10" min="1" max="20"><br>
-        <button onclick="search()">Search</button>
+    <div style="display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap;">
+        <div>
+            <label>Destination address</label><br>
+            <input type="text" id="address" placeholder="e.g. Ben Hill Griffin Stadium, Gainesville FL">
+        </div>
+        <div>
+            <label>Number of results</label><br>
+            <input type="number" id="numResults" value="10" min="1" max="20">
+        </div>
+        <button id="searchBtn" onclick="search()">Search</button>
+    </div>
+    <div class="progress-wrap" id="progress-wrap">
+        <div class="progress-label" id="progress-label">Searching...</div>
+        <div class="progress-track">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
     </div>
 
     <div id="error" class="error"></div>
@@ -26,13 +36,13 @@
     <div class="results">
         <div class="column">
             <h2>Dijkstra</h2>
-            <div id="dijkstra-results"></div>
             <div id="map-dj" class="map"></div>
+            <div id="dijkstra-results"></div>
         </div>
         <div class="column">
             <h2>A*</h2>
-            <div id="astar-results"></div>
             <div id="map-astar" class="map"></div>
+            <div id="astar-results"></div>
         </div>
     </div>
 
@@ -51,7 +61,7 @@
             map.eachLayer(layer => { if (layer instanceof L.CircleMarker) map.removeLayer(layer); });
 
             L.circleMarker([destLat, destLon], { radius: 10, color: '#e53e3e', fillColor: '#e53e3e', fillOpacity: 1 })
-                .addTo(map).bindPopup("Destination");
+                .addTo(map).bindPopup("<b>Your destination</b>");
 
             const bounds = [[destLat, destLon]];
             for (let i = 0; i < results.length; i++) {
@@ -60,19 +70,51 @@
                     ? (parseFloat(r.distance) / 1000).toFixed(2) + " km"
                     : Math.round(parseFloat(r.distance)) + " m";
                 L.circleMarker([parseFloat(r.lat), parseFloat(r.lon)], { radius: 8, color: '#3182ce', fillColor: '#3182ce', fillOpacity: 0.8 })
-                    .addTo(map).bindPopup(`#${i + 1} — ${r.type}<br>${distStr}`);
+                    .addTo(map).bindPopup(`
+                        <b>#${i + 1}</b><br> 
+                        Type: ${r.type}<br>
+                        Distance: ${distStr}<br>
+                        Coords: ${parseFloat(r.lat).toFixed(5)}, ${parseFloat(r.lon).toFixed(5)}<br>
+                        <a href="https://www.google.com/maps?q=${r.lat},${r.lon}" target="_blank">View on Google Maps</a>
+                    `); // Number, type, distance, coords, and link to Google Maps.
                 bounds.push([parseFloat(r.lat), parseFloat(r.lon)]);
             }
             map.fitBounds(bounds, { padding: [30, 30] });
+        }
+
+        let progressInterval = null;
+
+        function startProgress() {
+            const bar = document.getElementById("progress-bar");
+            const label = document.getElementById("progress-label");
+            document.getElementById("progress-wrap").classList.add("visible");
+            bar.style.width = "0%";
+            let progressEstimate = 0;
+            progressInterval = setInterval(() => {
+                progressEstimate = Math.min(progressEstimate + (Math.random() * 2.8), 98); // Roughly estimate based on past runtime on this computer and jump at end.
+                bar.style.width = progressEstimate + "%";
+                label.innerText = progressEstimate < 30 ? "Loading graph..." : progressEstimate < 60 ? "Running algorithms..." : "Collecting results...";
+            }, 500);
+        }
+
+        function endProgress() {
+            clearInterval(progressInterval);
+            document.getElementById("progress-bar").style.width = "100%";
+            setTimeout(() => { document.getElementById("progress-wrap").classList.remove("visible"); }, 600);
         }
 
         async function search() {
             document.getElementById("error").innerText = "";
             document.getElementById("dijkstra-results").innerHTML = "Loading...";
             document.getElementById("astar-results").innerHTML = "Loading...";
+            document.getElementById("map-dj").style.display = "none";
+            document.getElementById("map-astar").style.display = "none";
 
             const address = document.getElementById("address").value;
             const numResults = parseInt(document.getElementById("numResults").value);
+
+            startProgress();
+            document.getElementById("searchBtn").disabled = true;
 
             const response = await fetch("/search", {
                 method: "POST",
@@ -82,6 +124,9 @@
 
             const data = await response.json();
 
+            endProgress();
+            document.getElementById("searchBtn").disabled = false;
+
             if (data.error) {
                 document.getElementById("error").innerText = data.error;
                 document.getElementById("dijkstra-results").innerHTML = "";
@@ -89,6 +134,8 @@
                 return;
             }
 
+            document.getElementById("map-dj").style.display = "block";
+            document.getElementById("map-astar").style.display = "block";
             displayResults("dijkstra-results", data.dijkstra);
             displayResults("astar-results", data.astar);
             plotMap("map-dj", data.dijkstra, data.lat, data.lon);

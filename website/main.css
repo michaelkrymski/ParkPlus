@@ -9,11 +9,20 @@ h1 {
     margin-bottom: 20px;
 }
 
-input,
-button {
-    margin-top: 6px;
-    padding: 6px 10px;
+input {
+    background: #f7f8fa;
+    border: 1px solid #dde1f0;
+    border-radius: 8px;
+    color: #1a1a2e;
     font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+input:focus {
+    border-color: #3182ce;
+    box-shadow: 0 0 0 3px rgba(49, 130, 206, 0.15);
 }
 
 #address {
@@ -21,8 +30,29 @@ button {
 }
 
 button {
+    background: #3182ce;
+    border: none;
+    border-radius: 8px;
+    color: #fff;
     cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    padding: 10px 24px;
+    transition: opacity 0.2s, transform 0.1s;
     margin-top: 10px;
+}
+
+button:hover {
+    opacity: 0.85;
+}
+
+button:active {
+    transform: scale(0.97);
+}
+
+button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .error {
@@ -67,4 +97,38 @@ button {
     border-radius: 8px;
     border: 1px solid #ccc;
     margin-top: 12px;
+}
+
+.progress-wrap {
+    margin-top: 20px;
+    display: none;
+}
+
+.progress-wrap.visible {
+    display: block;
+}
+
+.progress-label {
+    font-size: 12px;
+    color: #888;
+    margin-bottom: 6px;
+}
+
+.progress-track {
+    background: #eee;
+    border-radius: 99px;
+    height: 6px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    border-radius: 99px;
+    background: #3182ce;
+    width: 0%;
+    transition: width 0.4s ease;
+}
+
+#numResults {
+    width: 120px;
 }
